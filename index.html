@@ -35,8 +35,15 @@
     color: #8effa0; font-weight: bold; font-size: 16px; text-shadow: 0 1px 2px #000;
   }
 
+  #pauseBtn {
+    position: absolute; top: 12px; left: 12px; width: 48px; height: 48px;
+    border-radius: 12px; border: 2px solid rgba(255,255,255,.3); color: #fff;
+    background: rgba(30,24,52,.6); font-size: 22px; cursor: pointer; pointer-events: auto;
+    box-shadow: 0 4px 0 rgba(0,0,0,.35); -webkit-tap-highlight-color: transparent; touch-action: none;
+  }
+  #pauseBtn:active { transform: translateY(2px); }
   #stats {
-    position: absolute; top: 14px; left: 14px;
+    position: absolute; top: 70px; left: 14px;
     background: rgba(30,24,52,.5); border: 2px solid rgba(255,255,255,.2);
     border-radius: 12px; padding: 8px 14px; font-size: 15px; line-height: 1.5;
   }
@@ -47,7 +54,7 @@
   #battFill { height: 100%; width: 100%; background: #ffd24d; border-radius: 6px; transition: width .25s, background .25s; }
   #rocketTag { margin-top: 4px; color: #ff9d5c; font-weight: bold; font-size: 13px; text-shadow: 0 1px 3px #000; }
   /* stelline inseguitori */
-  #stars { position: absolute; top: 14px; left: 158px; font-size: 22px; line-height: 1.1; max-width: 160px;
+  #stars { position: absolute; top: 70px; left: 158px; font-size: 22px; line-height: 1.1; max-width: 160px;
     color: #ffd76b; text-shadow: 0 2px 4px #000; letter-spacing: 1px; }
   #stars .lbl { display: block; font-size: 11px; letter-spacing: 1px; opacity: .8; color: #fff; }
 
@@ -64,15 +71,16 @@
   #arrowInner svg { display: block; width: 100%; height: 100%; }
   #arrow span { display: block; font-size: 12px; letter-spacing: 2px; opacity: .85; margin-top: 2px; color: #8effa0; }
   /* controller touch / tasti arcade (grandi) */
-  #touch { position: absolute; left: 0; right: 0; bottom: 0; height: 240px; pointer-events: none; }
-  #dpad { position: absolute; left: 20px; bottom: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .dpadRow { display: flex; gap: 10px; }
+  #touch { position: absolute; left: 0; right: 0; bottom: 0; height: 260px; pointer-events: none; }
+  #leftpad  { position: absolute; left: 20px;  bottom: 22px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  #rightpad { position: absolute; right: 24px; bottom: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .dpadRow { display: flex; gap: 14px; }
   .tbtn {
-    width: 74px; height: 74px; border-radius: 16px;
+    width: 80px; height: 80px; border-radius: 18px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-weight: bold; font-size: 28px; color: #ffe6b0;
+    font-weight: bold; font-size: 32px; color: #ffe6b0;
     background: rgba(40,30,60,.6); border: 3px solid rgba(255,255,255,.3);
-    box-shadow: 0 5px 0 rgba(0,0,0,.4); transition: all .06s;
+    box-shadow: 0 5px 0 rgba(0,0,0,.4); transition: background .06s, box-shadow .06s, transform .06s;
     pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent;
   }
   .tbtn.on {
@@ -81,8 +89,7 @@
     transform: translateY(3px);
   }
   .tbtn.fire {
-    position: absolute; right: 24px; bottom: 36px;
-    width: 104px; height: 104px; border-radius: 50%; font-size: 38px; color: #fff;
+    width: 100px; height: 100px; border-radius: 50%; font-size: 34px; color: #fff;
     background: radial-gradient(circle at 50% 35%, #ff8a4d, #d23b1a);
     border-color: #ffd0a8; box-shadow: 0 6px 0 #8f230c;
   }
@@ -121,6 +128,7 @@
 <div id="app"></div>
 
 <div id="hud" class="hidden">
+  <button id="pauseBtn">⏸</button>
   <div id="targets"></div>
   <div id="stats">
     Raccolti: <b id="collected">0</b> / 10<br>
@@ -137,15 +145,17 @@
     <span>OGGETTO</span>
   </div>
   <div id="touch">
-    <div id="dpad">
-      <div class="tbtn" id="kW" data-k="KeyW">W</div>
+    <div id="leftpad">
+      <div class="tbtn fire" id="kSpace">🚀<span>SPARA</span></div>
       <div class="dpadRow">
-        <div class="tbtn" id="kA" data-k="KeyA">A</div>
-        <div class="tbtn" id="kS" data-k="KeyS">S</div>
-        <div class="tbtn" id="kD" data-k="KeyD">D</div>
+        <div class="tbtn" id="kA" data-k="KeyA">◀</div>
+        <div class="tbtn" id="kD" data-k="KeyD">▶</div>
       </div>
     </div>
-    <div class="tbtn fire" id="kSpace">🚀<span>SPARA</span></div>
+    <div id="rightpad">
+      <div class="tbtn" id="kW" data-k="KeyW">▲</div>
+      <div class="tbtn" id="kS" data-k="KeyS">▼</div>
+    </div>
   </div>
 </div>
 
@@ -157,6 +167,12 @@
   <p>In alto vedi le <b>10 sagome</b> degli oggetti da trovare (telefoni, monete, tappi...).
      Occhio: se raccogli quelli <b style="color:#ff9f6b">sbagliati</b> sale il contatore immondizia.</p>
   <button class="btn" id="playBtn">GIOCA</button>
+</div>
+
+<div id="pause" class="overlay hidden">
+  <h1>⏸ PAUSA</h1>
+  <button class="btn" id="resumeBtn">▶ RIPRENDI</button>
+  <button class="btn" id="exitBtn" style="margin-top:14px;background:linear-gradient(#cfcfd6,#9a9aa6);box-shadow:0 6px 0 #5e5e6a;color:#2a2436">ESCI</button>
 </div>
 
 <div id="win" class="overlay hidden">
@@ -270,35 +286,36 @@ const blob = (r,col,x,y,z) => { const m=mk(new THREE.IcosahedronGeometry(r,0),co
 const cone = (r,h,y,col) => { const m=mk(new THREE.ConeGeometry(r,h,7),col); m.position.y=y; addOutline(m,1.05); return m; };
 
 // crea un albero di tipo casuale -> {group, radius}
+// radius = raggio del TRONCO (le foglie/chiome stanno in alto e NON fermano l'auto)
 function makeTree(){
-  const g = new THREE.Group(); let radius = 0.9;
+  const g = new THREE.Group(); let radius = 0.34;
   switch ((Math.random()*6)|0){
-    case 0: { // latifoglia tonda
-      const c = rc(GREENS); g.add(trunkMesh(0.2,0.28,1.2));
-      g.add(blob(1.0,c,0,1.8,0)); g.add(blob(0.7,rc(GREENS),(Math.random()-.5)*0.7,2.35,(Math.random()-.5)*0.7));
-      radius = 0.95; break; }
-    case 1: { // pino a coni
-      g.add(trunkMesh(0.18,0.24,0.9));
-      g.add(cone(1.0,1.3,1.4,0x2f7d4a)); g.add(cone(0.8,1.1,2.05,0x357f4e)); g.add(cone(0.55,0.95,2.65,0x2f7d4a));
-      radius = 0.85; break; }
+    case 0: { // latifoglia tonda, alta
+      const c = rc(GREENS); g.add(trunkMesh(0.24,0.32,2.4));
+      g.add(blob(1.3,c,0,3.3,0)); g.add(blob(0.95,rc(GREENS),(Math.random()-.5)*0.9,4.0,(Math.random()-.5)*0.9));
+      radius = 0.34; break; }
+    case 1: { // pino a coni, alto
+      g.add(trunkMesh(0.22,0.3,1.6));
+      g.add(cone(1.2,1.8,2.3,0x2f7d4a)); g.add(cone(0.95,1.5,3.3,0x357f4e)); g.add(cone(0.65,1.3,4.2,0x2f7d4a));
+      radius = 0.32; break; }
     case 2: { // cipresso alto e stretto
-      g.add(trunkMesh(0.14,0.18,0.6)); g.add(cone(0.55,2.7,1.75,0x3a7d52));
-      radius = 0.6; break; }
-    case 3: { // cespuglio basso
+      g.add(trunkMesh(0.16,0.2,0.9)); g.add(cone(0.62,3.8,2.6,0x3a7d52));
+      radius = 0.24; break; }
+    case 3: { // cespuglio basso (niente tronco -> quasi nessuna collisione)
       const c = rc(GREENS);
-      g.add(blob(0.8,c,0,0.7,0)); g.add(blob(0.6,rc(GREENS),0.5,0.8,0.2)); g.add(blob(0.55,c,-0.45,0.72,-0.25));
-      radius = 0.9; break; }
-    case 4: { // ciliegio in fiore (o autunnale)
+      g.add(blob(0.85,c,0,0.7,0)); g.add(blob(0.65,rc(GREENS),0.55,0.8,0.2)); g.add(blob(0.6,c,-0.5,0.72,-0.25));
+      radius = 0.15; break; }
+    case 4: { // ciliegio in fiore, alto
       const pal = Math.random()<0.6 ? BLOSS : AUTUMN; const c = rc(pal);
-      g.add(trunkMesh(0.2,0.28,1.3));
-      g.add(blob(0.95,c,0,1.9,0)); g.add(blob(0.6,rc(pal),0.55,2.2,0.1)); g.add(blob(0.6,rc(pal),-0.5,2.1,-0.2));
-      radius = 0.95; break; }
-    default: { // palma
-      const tr = mk(new THREE.CylinderGeometry(0.14,0.22,2.3,6),0xb07a44); tr.position.y=1.15; tr.rotation.z=0.12; g.add(tr);
-      for (let k=0;k<6;k++){ const p=new THREE.Group(); p.position.set(0.1,2.3,0); p.rotation.y=k*Math.PI/3;
-        const fr=cone(0.16,1.5,0,0x4fae4f); fr.rotation.x=Math.PI/2.15; fr.position.set(0,-0.1,0.65); p.add(fr); g.add(p); }
-      const nut=mk(new THREE.SphereGeometry(0.13,8,8),0x7a5230); nut.position.set(0.1,2.15,0); g.add(nut);
-      radius = 0.7; break; }
+      g.add(trunkMesh(0.24,0.32,2.5));
+      g.add(blob(1.2,c,0,3.4,0)); g.add(blob(0.75,rc(pal),0.7,3.8,0.1)); g.add(blob(0.75,rc(pal),-0.65,3.6,-0.2));
+      radius = 0.34; break; }
+    default: { // palma, alta
+      const tr = mk(new THREE.CylinderGeometry(0.16,0.26,3.6,6),0xb07a44); tr.position.y=1.8; tr.rotation.z=0.12; g.add(tr);
+      for (let k=0;k<6;k++){ const p=new THREE.Group(); p.position.set(0.18,3.6,0); p.rotation.y=k*Math.PI/3;
+        const fr=cone(0.18,1.9,0,0x4fae4f); fr.rotation.x=Math.PI/2.15; fr.position.set(0,-0.12,0.82); p.add(fr); g.add(p); }
+      const nut=mk(new THREE.SphereGeometry(0.15,8,8),0x7a5230); nut.position.set(0.18,3.4,0); g.add(nut);
+      radius = 0.26; break; }
   }
   return { group:g, radius };
 }
@@ -403,8 +420,8 @@ let currentTargetIndex = 0;     // 0..9
 const WRENCH_HEAL = 25;         // % di scocca riparata da una chiave inglese
 const WRENCH_COUNT = 7;         // chiavi inglesi presenti sulla mappa
 const BATT_HEAL = 40;           // % di batteria ricaricata
-const BATT_COUNT = 3;           // batterie presenti sulla mappa
-const ROCKET_COUNT = 1;         // razzi presenti sulla mappa
+const BATT_COUNT = 5;           // batterie presenti sulla mappa
+const ROCKET_COUNT = 3;         // razzi presenti sulla mappa
 
 // chiave inglese (ripara l'auto)
 function makeWrench(){
@@ -601,7 +618,7 @@ function updateRoadblock(){
   if (collected < 6){ if (roadblock) despawnRoadblock(); return; }
   if (!roadblock){ roadblock = spawnRoadblock(); return; }
   const d = carUp.clone().multiplyScalar(R).distanceTo(roadblock.center.clone().multiplyScalar(R));
-  if (d < 11 || performance.now()-roadblock.born > 16000){   // mentre ti avvicini scompare e riappare davanti
+  if (d < 14 || performance.now()-roadblock.born > 16000){   // mentre ti avvicini scompare e riappare davanti
     despawnRoadblock(); roadblock = spawnRoadblock();
   }
 }
@@ -612,7 +629,8 @@ function updateRoadblock(){
 const keys = {};
 addEventListener('keydown', e=>{
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
-  if(e.code==='Space' && !e.repeat && running && !finished) fireRocket();
+  if((e.code==='Escape'||e.code==='KeyP') && !e.repeat) togglePause();
+  if(e.code==='Space' && !e.repeat && running && !finished && !paused) fireRocket();
   keys[e.code]=true;
 });
 addEventListener('keyup', e=>{ keys[e.code]=false; });
@@ -678,9 +696,9 @@ function updateHazards(dt){
         THREE.MathUtils.lerp(1.0,0.16,k), THREE.MathUtils.lerp(0.35,0.05,k), THREE.MathUtils.lerp(0.08,0.03,k));
       h.group.material.opacity = 0.92*fade;
     } else if (fade<1){ h.group.children.forEach(c=>{ if(c.material&&c.material.transparent) c.material.opacity = 0.8*fade; }); }
-    // contatto col giocatore -> rallenta
-    if (running && !finished && cp.distanceTo(h.dir.clone().multiplyScalar(R)) < h.radius + 0.5){
-      slowTimer = Math.max(slowTimer, h.kind==='trap'?1.4:0.9);
+    // solo le TRAPPOLE rallentano; la scia infuocata è solo estetica
+    if (h.kind==='trap' && running && !finished && cp.distanceTo(h.dir.clone().multiplyScalar(R)) < h.radius + 0.5){
+      slowTimer = Math.max(slowTimer, 1.4);
     }
   }
 }
@@ -722,6 +740,17 @@ const arrowEl = document.getElementById('arrow'), arrowInner = document.getEleme
 
 let collected=0, startTime=0, running=false, finished=false;
 let health=100, lastHit=0;
+let paused=false, pauseStart=0;
+function togglePause(){
+  if (!running || finished) return;
+  if (!paused){ paused=true; pauseStart=performance.now(); document.getElementById('pause').classList.remove('hidden'); }
+  else resumeGame();
+}
+function resumeGame(){
+  if (!paused) return;
+  paused=false; startTime += performance.now()-pauseStart;
+  document.getElementById('pause').classList.add('hidden');
+}
 function updateHpBar(){
   const v=Math.max(0,Math.round(health));
   elHp.textContent=v; hpFill.style.width=v+'%';
@@ -780,6 +809,7 @@ const clock=new THREE.Clock();
 function loop(){
   requestAnimationFrame(loop);
   const dt=Math.min(clock.getDelta(),0.05);
+  if (paused){ renderer.render(scene, camera); return; }   // congela tutto durante la pausa
   if (running && !finished) updatePhysics(dt);
   if (running && !finished) updateChasers(dt);
   if (running && !finished) updateRoadblock();
@@ -826,7 +856,7 @@ function updatePhysics(dt){
   const steerIn  = inAxis('ArrowRight','ArrowLeft')+inAxis('KeyD','KeyA');
 
   // batteria che si scarica (RC) -> a 0 ti fermi e perdi
-  battery -= (1.4 + Math.abs(speed)*0.06) * dt;
+  battery -= (0.28 + Math.abs(speed)*0.018) * dt;
   if (battery <= 0){ battery = 0; updateBattBar(); loseGame('batt'); return; }
   updateBattBar();
 
@@ -866,33 +896,26 @@ function updatePhysics(dt){
     reproject(lookFwd); reproject(moveFwd);
   }
 
-  // collisioni con alberi: l'auto SCIVOLA via e accumula danni
+  // collisioni con alberi: l'auto si SCANSA liscia attorno al tronco (nessun danno)
   const carR = 0.55;
   const carPos = tmpA.copy(carUp).multiplyScalar(R);
   for (const ob of obstacles){
     const dist = carPos.distanceTo(ob.pos);
     const minD = ob.radius + carR;
     if (dist < minD){
-      // spingi l'auto fuori dall'albero, lungo la tangente
       const away = carPos.clone().sub(ob.pos);
       away.sub(carUp.clone().multiplyScalar(away.dot(carUp))).normalize();
+      // spingi fuori dal tronco
       const pushAxis = new THREE.Vector3().crossVectors(carUp, away).normalize();
       _q.setFromAxisAngle(pushAxis, (minD-dist)/R);
       carUp.applyQuaternion(_q).normalize(); lookFwd.applyQuaternion(_q); moveFwd.applyQuaternion(_q);
       reproject(lookFwd); reproject(moveFwd);
-      // scivola lungo il bordo invece di fermarsi
+      // devia marcia E sterzo lungo il bordo: scivola via senza fermarsi
       const slide = new THREE.Vector3().crossVectors(away, carUp).normalize();
       if (slide.dot(moveFwd) < 0) slide.negate();
-      moveFwd.lerp(slide, 0.5); reproject(moveFwd);
-      // danni in base alla velocità d'impatto (con cooldown)
-      const now = performance.now();
-      if (now - lastHit > 250){
-        const impact = Math.abs(speed);
-        if (impact > 1.2){ health -= Math.min(20, 2 + impact*1.8); flash(0xff3b3b); updateHpBar(); }
-        lastHit = now;
-        if (health <= 0){ health = 0; updateHpBar(); loseGame(); }
-      }
-      speed *= 0.65;   // perde slancio ma continua
+      moveFwd.lerp(slide, 0.75); reproject(moveFwd);
+      lookFwd.lerp(slide, 0.5);  reproject(lookFwd);
+      speed *= 0.94;   // mantiene quasi tutta la velocità
       break;
     }
   }
@@ -1000,23 +1023,23 @@ function updateChasers(dt){
       if (aggressive){ ch.trapT -= dt; if (ch.trapT <= 0){ ch.trapT = 2.5 + Math.random()*2; dropHazard(ch.up.clone(), ch.look, 'trap'); } }
     }
 
-    // speronamento
+    // urto: COLPO SECCO singolo -> ti azzera la velocità, poi sei libero (niente "incollata")
     const pp = carUp.clone().multiplyScalar(R), op = ch.up.clone().multiplyScalar(R);
-    if (pp.distanceTo(op) < 1.7){
+    const cdist = pp.distanceTo(op);
+    if (cdist < 1.8){
       const now = performance.now();
-      const away = pp.clone().sub(op); projTangent(away, carUp);
-      if (aggressive){
-        // ti fa VOLARE via
-        if (now - ch.lastRam > 900){ health -= 12; flash(0xff3b3b); updateHpBar(); ch.lastRam = now; ch.speed *= 0.3;
-          if (health <= 0){ health = 0; updateHpBar(); loseGame(); } }
-        moveFwd.copy(away); lookFwd.copy(away); projTangent(lookFwd,carUp); projTangent(moveFwd,carUp);
-        speed = 22; hopTimer = 0.75;
-      } else {
-        if (now - ch.lastRam > 650){ health -= 6; flash(0xff3b3b); updateHpBar(); ch.lastRam = now; ch.speed *= 0.4;
-          if (health <= 0){ health = 0; updateHpBar(); loseGame(); } }
-        _qc.setFromAxisAngle(new THREE.Vector3().crossVectors(carUp, away).normalize(), 0.5/R);
-        carUp.applyQuaternion(_qc).normalize(); projTangent(lookFwd, carUp); projTangent(moveFwd, carUp);
-        speed *= 0.85;
+      if (now - ch.lastRam > 700){
+        ch.lastRam = now;
+        speed = 0;                                   // azzera la tua velocità (una volta)
+        health -= aggressive?7:5; flash(0xff3b3b); updateHpBar();
+        if (health <= 0){ health = 0; updateHpBar(); loseGame(); }
+        // il nemico rimbalza indietro e si allontana (non resta appiccicato)
+        ch.speed = -6;
+        const away = op.clone().sub(pp); projTangent(away, ch.up);
+        if (away.lengthSq() > 1e-6){
+          _qc.setFromAxisAngle(new THREE.Vector3().crossVectors(ch.up, away.normalize()).normalize(), (1.8-cdist+0.5)/R);
+          ch.up.applyQuaternion(_qc).normalize(); ch.look.applyQuaternion(_qc); projTangent(ch.look, ch.up);
+        }
       }
     }
     orientCar(ch.group, ch.up, ch.look);
@@ -1044,7 +1067,10 @@ function updateExplosions(){
     e.m.scale.setScalar(0.5+a*3.5); e.m.material.opacity = 0.95*(1-a); e.m.material.color.setHex(a<0.5?0xffe14d:0xff6a1a);
   }
 }
-function destroyChaser(k){ scene.remove(chasers[k].group); chasers.splice(k,1); updateStars(); }
+function destroyChaser(k){
+  scene.remove(chasers[k].group); chasers.splice(k,1); updateStars();
+  setTimeout(()=>{ if (running && !finished) spawnChaser(collected>=7); }, 10000);   // rispawna dopo 10s
+}
 function fireRocket(){
   if (!hasRocket) return;
   hasRocket = false; rocketIcon.visible = false; rocketTag.classList.add('hidden');
@@ -1134,6 +1160,9 @@ function startGame(){
 document.getElementById('playBtn').onclick=startGame;
 document.getElementById('againBtn').onclick=()=>location.reload();
 document.getElementById('retryBtn').onclick=()=>location.reload();
+document.getElementById('pauseBtn').onclick=togglePause;
+document.getElementById('resumeBtn').onclick=resumeGame;
+document.getElementById('exitBtn').onclick=()=>location.reload();
 addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
 
 loop();
