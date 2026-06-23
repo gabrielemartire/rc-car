@@ -6,7 +6,8 @@
 <title>Globo Garbage Rally</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #2a2240; font-family: 'Trebuchet MS', system-ui, sans-serif; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #2a2240; font-family: 'Trebuchet MS', system-ui, sans-serif;
+    touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   #app { position: fixed; inset: 0; }
   canvas { display: block; }
 
@@ -62,25 +63,36 @@
   }
   #arrowInner svg { display: block; width: 100%; height: 100%; }
   #arrow span { display: block; font-size: 12px; letter-spacing: 2px; opacity: .85; margin-top: 2px; color: #8effa0; }
-  /* tasti stile arcade */
-  #keys {
-    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  /* controller touch / tasti arcade (grandi) */
+  #touch { position: absolute; left: 0; right: 0; bottom: 0; height: 240px; pointer-events: none; }
+  #dpad { position: absolute; left: 20px; bottom: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .dpadRow { display: flex; gap: 10px; }
+  .tbtn {
+    width: 74px; height: 74px; border-radius: 16px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 28px; color: #ffe6b0;
+    background: rgba(40,30,60,.6); border: 3px solid rgba(255,255,255,.3);
+    box-shadow: 0 5px 0 rgba(0,0,0,.4); transition: all .06s;
+    pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent;
   }
-  .krow { display: flex; gap: 6px; }
-  .key {
-    min-width: 42px; height: 42px; padding: 0 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: bold; font-size: 16px; color: #ffe6b0;
-    background: rgba(40,30,60,.55); border: 2px solid rgba(255,255,255,.25);
-    border-radius: 10px; box-shadow: 0 4px 0 rgba(0,0,0,.35);
-    transition: all .06s;
-  }
-  .key.wide { min-width: 150px; letter-spacing: 1px; }
-  .key.on {
+  .tbtn.on {
     color: #4a2200; background: linear-gradient(#ffe09b,#ffa55d);
-    border-color: #fff; box-shadow: 0 4px 0 #c06a24, 0 0 16px rgba(255,200,80,.75);
-    transform: translateY(2px);
+    border-color: #fff; box-shadow: 0 5px 0 #c06a24, 0 0 18px rgba(255,200,80,.8);
+    transform: translateY(3px);
+  }
+  .tbtn.fire {
+    position: absolute; right: 24px; bottom: 36px;
+    width: 104px; height: 104px; border-radius: 50%; font-size: 38px; color: #fff;
+    background: radial-gradient(circle at 50% 35%, #ff8a4d, #d23b1a);
+    border-color: #ffd0a8; box-shadow: 0 6px 0 #8f230c;
+  }
+  .tbtn.fire span { font-size: 13px; letter-spacing: 1px; }
+  .tbtn.fire:active { transform: translateY(3px); box-shadow: 0 3px 0 #8f230c; }
+  @media (max-width: 760px){
+    #targets { top: 6px; gap: 4px; padding: 6px 8px; }
+    .slot { width: 38px; height: 38px; }
+    .slot canvas { width: 30px; height: 30px; }
+    #arrow { top: 70px; }
   }
 
   .overlay {
@@ -124,10 +136,16 @@
     <div id="arrowInner"><svg viewBox="0 0 60 70"><path d="M30 4 L53 33 L40 33 L40 65 L20 65 L20 33 L7 33 Z" fill="#4fe08a" stroke="#1d7a45" stroke-width="3.5" stroke-linejoin="round"/></svg></div>
     <span>OGGETTO</span>
   </div>
-  <div id="keys">
-    <div class="krow"><div class="key" id="kW">W</div></div>
-    <div class="krow"><div class="key" id="kA">A</div><div class="key" id="kS">S</div><div class="key" id="kD">D</div></div>
-    <div class="krow"><div class="key wide" id="kSpace">SPAZIO</div></div>
+  <div id="touch">
+    <div id="dpad">
+      <div class="tbtn" id="kW" data-k="KeyW">W</div>
+      <div class="dpadRow">
+        <div class="tbtn" id="kA" data-k="KeyA">A</div>
+        <div class="tbtn" id="kS" data-k="KeyS">S</div>
+        <div class="tbtn" id="kD" data-k="KeyD">D</div>
+      </div>
+    </div>
+    <div class="tbtn fire" id="kSpace">🚀<span>SPARA</span></div>
   </div>
 </div>
 
@@ -685,6 +703,22 @@ const elCollected=document.getElementById('collected'),
 const kEl = { up:document.getElementById('kW'), dn:document.getElementById('kS'),
               lf:document.getElementById('kA'), rt:document.getElementById('kD'), sp:document.getElementById('kSpace') };
 const arrowEl = document.getElementById('arrow'), arrowInner = document.getElementById('arrowInner');
+
+// ---- controlli touch (D-pad WASD + tasto SPARA) ----
+(function setupTouch(){
+  const hold = (el, code) => {
+    const dn = e => { e.preventDefault(); try{el.setPointerCapture(e.pointerId);}catch(_){} keys[code]=true; };
+    const up = e => { e.preventDefault(); keys[code]=false; };
+    el.addEventListener('pointerdown', dn);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('pointerleave', up);
+    el.addEventListener('contextmenu', e=>e.preventDefault());
+  };
+  hold(kEl.up,'KeyW'); hold(kEl.dn,'KeyS'); hold(kEl.lf,'KeyA'); hold(kEl.rt,'KeyD');
+  kEl.sp.addEventListener('pointerdown', e=>{ e.preventDefault(); if (running && !finished) fireRocket(); });
+  kEl.sp.addEventListener('contextmenu', e=>e.preventDefault());
+})();
 
 let collected=0, startTime=0, running=false, finished=false;
 let health=100, lastHit=0;
