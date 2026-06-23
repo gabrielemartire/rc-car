@@ -583,7 +583,7 @@ function spawnChaser(fast){
   orientCar(g, up, look);
   const wide = Math.random() < 0.45;                                   // strade alternative / arco più largo
   chasers.push({ group:g, up, look, speed:0,
-    maxSpeed:(fast?12.5:9.5)+Math.random()*1.3,
+    maxSpeed: Math.min(11, (fast?10.5:9)+Math.random()*0.8),          // sempre < 12 (la tua velocità)
     turn:(wide?1.3:1.9), offset:(wide?(Math.random()<0.5?-0.6:0.6):0),
     lastFire:null, trapT:1, lastRam:0 });
   updateStars();
@@ -618,7 +618,8 @@ function updateRoadblock(){
   if (collected < 6){ if (roadblock) despawnRoadblock(); return; }
   if (!roadblock){ roadblock = spawnRoadblock(); return; }
   const d = carUp.clone().multiplyScalar(R).distanceTo(roadblock.center.clone().multiplyScalar(R));
-  if (d < 14 || performance.now()-roadblock.born > 16000){   // mentre ti avvicini scompare e riappare davanti
+  // resta lì mentre ti avvicini: riappare davanti solo se lo superi/lasci indietro o dopo molto tempo
+  if (d > 34 || performance.now()-roadblock.born > 22000){
     despawnRoadblock(); roadblock = spawnRoadblock();
   }
 }
@@ -792,7 +793,7 @@ function onCollect(c){
   elCollected.textContent=collected; flash(0x8effa0);
   // progressione inseguitori (il posto di blocco compare/ricompare dal 6° via updateRoadblock)
   if (collected<=6) spawnChaser(false);                       // +1 rivale per oggetto, fino a 6
-  if (collected===7) chasers.forEach(ch=>{ ch.maxSpeed+=2.5; ch.turn+=0.4; });  // più aggressivi
+  if (collected===7) chasers.forEach(ch=>{ ch.maxSpeed=Math.min(11, ch.maxSpeed+1); ch.turn+=0.4; });  // più aggressivi (ma mai più veloci di te)
   if (collected>=10){ finishGame(); return; }
   spawnNextTarget();                                          // prossimo oggetto, uno alla volta
 }
